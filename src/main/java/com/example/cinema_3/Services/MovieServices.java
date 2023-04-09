@@ -146,6 +146,7 @@ public class MovieServices {
 
     public void deleteById(Long movieID) {
 
+
         // clear the forein keys then update it
         Optional<Movie> movie = movieRepository.findMovieByMovieId(movieID);
         Movie movieObject = movie.get();

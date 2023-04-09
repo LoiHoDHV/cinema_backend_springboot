@@ -2,6 +2,7 @@ package com.example.cinema_3.Services;
 
 import com.example.cinema_3.Repositories.FoodRepository;
 import com.example.cinema_3.domain.Food;
+import com.example.cinema_3.domain.FoodComboItem;
 import com.example.cinema_3.dto.FoodDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,45 @@ public class FoodServices {
             return null;
         }
 
+    }
+
+    public Food updateTheFood(Long foodId, FoodDTO foodDTO){
+        Optional<Food> foodFind = foodRepository.findById(foodId);
+        try{
+            Food foodDatabase = foodFind.get();
+
+            Set<FoodComboItem> foodComboItems = foodDatabase.getFoodCombos();
+
+            foodDatabase = mapper.map(foodDTO, Food.class);
+            foodDatabase.setFoodId(foodId);
+            if(foodComboItems.size() != 0){
+                foodDatabase.setFoodCombos(foodComboItems);
+            }
+
+            return foodRepository.save(foodDatabase);
+        }catch (NoSuchElementException e){
+            return null;
+        }
+
+
+
+    }
+
+    public int deleteFood(long foodId){
+        // 1: Ok
+        // -1: Wrong fa
+        Optional<Food> foodFind = foodRepository.findById(foodId);
+        try{
+            Food foodDatabase = foodFind.get();
+
+            foodDatabase.getFoodCombos().clear();
+            foodRepository.save(foodDatabase);
+
+            foodRepository.deleteById(foodId);
+            return 1;
+        }catch (NoSuchElementException e){
+            return -1;
+        }
     }
 
 }
