@@ -1,17 +1,23 @@
-package com.example.cinema_3.domain;
+package com.example.cinema_3.domain.foodDomain;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.NaturalIdCache;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Data
 @Table(name="tbl_food")
+@EqualsAndHashCode
 public class Food {
 
     @Id
@@ -28,14 +34,7 @@ public class Food {
     private Long foodQuantity;
 
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
-    @JsonIgnore
-    @JsonManagedReference
-    private Set<FoodComboItem> foodCombos;
-
-
-
-
-
-
+    @ToString.Exclude
+    private List<ComboFood> listCombo = new ArrayList<>();
 
 }
