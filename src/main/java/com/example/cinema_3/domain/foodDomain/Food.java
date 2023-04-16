@@ -33,7 +33,8 @@ public class Food {
     @Column(name = "food_quantity")
     private Long foodQuantity;
 
-    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ToString.Exclude
     private List<ComboFood> listCombo = new ArrayList<>();
 

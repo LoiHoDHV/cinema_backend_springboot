@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class Combo {
     @Column(name = "combo_quantity")
     private int comboQuantity;
 
-    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ToString.Exclude
     private List<ComboFood> listCombo = new ArrayList<>();
@@ -52,6 +53,20 @@ public class Combo {
         this.listCombo.add(comboFood);
         food.setFoodQuantity(food.getFoodQuantity() - foodQuantity);
         food.getListCombo().add(comboFood);
+    }
+
+
+    public void removeFood(){
+        for(Iterator<ComboFood> iterator = listCombo.iterator(); iterator.hasNext();){
+            ComboFood comboFood = iterator.next();
+
+            if(comboFood.getCombo().equals(this)){
+                iterator.remove();
+                comboFood.getFood().getListCombo().remove(comboFood);
+                comboFood.setFood(null);
+                comboFood.setCombo(null);
+            }
+        }
     }
 
 
