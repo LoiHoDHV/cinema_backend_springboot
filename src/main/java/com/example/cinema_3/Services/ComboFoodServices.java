@@ -138,40 +138,64 @@ public class ComboFoodServices {
         Integer comboQuantity = combo.getComboQuantity();
         // truoc khi xoa thi phai tra ve so luong cho tung san pham ve lai vi tri
 
-//        if(combo.getListCombo() != null && combo.getListCombo().size() != 0){
-//            for (ComboFood comboFood : combo.getListCombo()) {
-//                Food food = comboFood.getFood();
-//                Long foodQuantityInDb = food.getFoodQuantity();
-//                Integer foodInComboQuantiy = comboFood.getQuantity();
-//                food.setFoodQuantity(foodQuantityInDb + foodInComboQuantiy * comboQuantity);
-//                foodRepository.save(food);
-//            }
-//
-//        }
-//        combo.getListCombo().clear();
-//        Set<FoodDTO> foodDTOSet = foodComboDTO.getListResponseDTOS();
-//        for (FoodDTO foodDTO : foodDTOSet) {
-//            String foodName = foodDTO.getFoodName();
-//            Optional<Food> foodOpt = foodRepository.findFoodByFoodName(foodName);
-//            Food food = foodOpt.get();
-//
-//            Long foodId = food.getFoodId();
-//            food = mapper.map(foodDTO, Food.class);
-//            food.setFoodId(foodId);
-//            combo.addFoodCombo(food, Math.toIntExact(foodDTO.getFoodQuantity()));
-//        }
-//        comboRepository.save(combo);
 
         if(combo.getListCombo() != null && combo.getListCombo().size() != 0){
+            for (ComboFood comboFood : combo.getListCombo()) {
+                Food food = comboFood.getFood();
+                Long foodQuantityInDb = food.getFoodQuantity();
+                Integer foodInComboQuantity = comboFood.getQuantity();
+                food.setFoodQuantity(foodQuantityInDb + foodInComboQuantity * comboQuantity);
+                foodRepository.save(food);
+            }
             combo.removeFood();
         }
+
+        Set<FoodDTO> foodDTOSet = foodComboDTO.getListResponseDTOS();
+        List<FoodResponseDTO> foodResponseDTOList = new ArrayList<>();
+        for (FoodDTO foodDTO : foodDTOSet) {
+            String foodName = foodDTO.getFoodName();
+            Optional<Food> foodOpt = foodRepository.findFoodByFoodName(foodName);
+            Food food = foodOpt.get();
+
+            Long foodId = food.getFoodId();
+            food = mapper.map(foodDTO, Food.class);
+            food.setFoodId(foodId);
+            combo.addFoodCombo(food, Math.toIntExact(foodDTO.getFoodQuantity()));
+            FoodResponseDTO foodResponseDTO =
+                    new FoodResponseDTO(foodId, foodName, food.getFoodPrice(), Math.toIntExact(foodDTO.getFoodQuantity()));
+            foodResponseDTOList.add(foodResponseDTO);
+        }
+
+
         comboRepository.save(combo);
         ComboResponseDTO comboResponseDTO = mapper.map(combo, ComboResponseDTO.class);
+        comboResponseDTO.setListResponseDTOS(foodResponseDTOList);
 
         return comboResponseDTO;
 
+    }
 
+    @Transactional
+    public Integer deleteComboFood(Long comboId){
+        Combo combo = comboRepository.findById(comboId).orElseThrow(() -> new EntityNotFoundException("Combo not found!"));
+        Integer comboQuantity = combo.getComboQuantity();
+        if(combo.getListCombo() != null && combo.getListCombo().size() != 0){
+            for (ComboFood comboFood : combo.getListCombo()) {
+                Food food = comboFood.getFood();
+                Long foodQuantityInDb = food.getFoodQuantity();
+                Integer foodInComboQuantity = comboFood.getQuantity();
+                food.setFoodQuantity(foodQuantityInDb + foodInComboQuantity * comboQuantity);
+                foodRepository.save(food);
+            }
+            combo.removeFood();
+        }
 
+        try{
+            comboRepository.delete(combo);
+        }catch (RuntimeException e){
+            return -1;
+        }
 
+        return 1;
     }
 }

@@ -4,6 +4,7 @@ package com.example.cinema_3.controllers.admin;
 import com.example.cinema_3.Services.ComboFoodServices;
 import com.example.cinema_3.dto.FoodComboDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,5 +59,18 @@ public class ComboController {
             errors.put("message", "Bad Request");
             return ResponseEntity.internalServerError().body(errors);
         }
+    }
+
+    @DeleteMapping(value = "/{comboId}")
+    public ResponseEntity<?> deleteTheCombo(@PathVariable Long comboId){
+        Integer status = comboFoodServices.deleteComboFood(comboId);
+        if(status == -1){
+            Map<String, String> errors = new HashMap<>();
+            errors.put("message", "Internal Servcer Errors");
+            return ResponseEntity.internalServerError().body(errors);
+        }
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .header("comboDeleted", String.valueOf(status))
+                .body("Deleted Successfully");
     }
 }
